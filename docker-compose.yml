@@ -2,11 +2,7 @@ version: "3.8"
 
 services:
   wg2vless:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        XRAY_VERSION: "26.2.6"
+    image: spinogrizz/wg2vless:latest
     container_name: wg2vless
     restart: unless-stopped
 
