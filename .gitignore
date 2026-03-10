@@ -1,0 +1,4 @@
+.claude
+CLAUDE.md
+data/
+docker-compose.yml.local

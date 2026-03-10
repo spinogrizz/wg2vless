@@ -1,0 +1,87 @@
+{
+  "log": {
+    "loglevel": "${XRAY_LOGLEVEL}",
+    "access": "none"
+  },
+  "dns": {
+    "servers": ${DNS_JSON}
+  },
+  "inbounds": [
+    {
+      "tag": "wg-in",
+      "protocol": "wireguard",
+      "listen": "0.0.0.0",
+      "port": ${WG_PORT},
+      "settings": {
+        "secretKey": "${SERVER_PRIVATE_KEY}",
+        "mtu": ${WG_MTU},
+        "peers": [
+          {
+            "publicKey": "${CLIENT_PUBLIC_KEY}",
+            "allowedIPs": [
+              "${WG_CLIENT_IP}/32"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "vless-out",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "${VLESS_HOST}",
+            "port": ${VLESS_PORT},
+            "users": [
+              {
+                "id": "${VLESS_UUID}",
+                "encryption": "none",
+                "flow": "${VLESS_FLOW}"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": ${STREAM_SETTINGS}
+    },
+    {
+      "tag": "direct",
+      "protocol": "freedom"
+    },
+    {
+      "tag": "block",
+      "protocol": "blackhole"
+    }
+  ],
+  "routing": {
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+      {
+        "type": "field",
+        "ip": [
+          "255.255.255.255/32",
+          "224.0.0.0/4"
+        ],
+        "outboundTag": "block"
+      },
+      {
+        "type": "field",
+        "ip": [
+          "10.0.0.0/8",
+          "172.16.0.0/12",
+          "192.168.0.0/16",
+          "fc00::/7"
+        ],
+        "outboundTag": "block"
+      },
+      {
+        "type": "field",
+        "inboundTag": ["wg-in"],
+        "outboundTag": "vless-out"
+      }
+    ]
+  }
+}
